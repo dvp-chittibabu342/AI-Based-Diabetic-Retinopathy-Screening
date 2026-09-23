@@ -206,8 +206,6 @@ class APTOSLoader:
         Compute inverse-frequency class weights for imbalance correction.
         strategy: 'balanced' (sklearn) or 'sqrt_inv'
         """
-        from sklearn.utils.class_weight import compute_class_weight
-
         if train_labels is None:
             if self._dataset is None:
                 self.load()
@@ -224,11 +222,19 @@ class APTOSLoader:
             weights = 1.0 / np.sqrt(counts)
             weights = weights / weights.sum() * self.NUM_CLASSES
         else:  # 'balanced'
-            weights = compute_class_weight(
-                class_weight="balanced",
-                classes=np.arange(self.NUM_CLASSES),
-                y=train_labels,
-            )
+            try:
+                from sklearn.utils.class_weight import compute_class_weight
+                weights = compute_class_weight(
+                    class_weight="balanced",
+                    classes=np.arange(self.NUM_CLASSES),
+                    y=train_labels,
+                )
+            except ImportError:
+                # Direct analytical numpy calculation: n_samples / (n_classes * bincount(y))
+                counts = np.bincount(train_labels, minlength=self.NUM_CLASSES).astype(float)
+                counts = np.maximum(counts, 1.0)
+                n_samples = float(len(train_labels))
+                weights = n_samples / (self.NUM_CLASSES * counts)
 
         logger.info("Class weights (%s): %s", strategy,
                     [f"{w:.3f}" for w in weights])

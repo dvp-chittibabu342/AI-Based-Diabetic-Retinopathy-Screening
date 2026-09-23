@@ -168,16 +168,16 @@ def main():
         import traceback; traceback.print_exc()
         failed += 1
 
-    # ── Test 8: Grad-CAM placeholder ────────────────────────────────────
+    # ── Test 8: Grad-CAM Safety (No Fake Heatmaps) ──────────────────────
     try:
         from explainability.gradcam import GradCAMGenerator
         gcam_gen = GradCAMGenerator(model=None)
         overlay, is_real = gcam_gen.generate_heatmap(
             tensor_val.unsqueeze(0), img, predicted_grade=2
         )
-        assert overlay is not None
-        assert not is_real  # Should be placeholder since no model loaded
-        print(f"[PASS] Grad-CAM placeholder: overlay size={overlay.size}, real={is_real}")
+        assert overlay is None, "Must not generate synthetic heatmaps when model is unavailable"
+        assert not is_real
+        print("[PASS] Grad-CAM safety: honest refusal without fake heatmap (overlay=None, real=False)")
         passed += 1
     except Exception as e:
         print(f"[FAIL] Grad-CAM: {e}")

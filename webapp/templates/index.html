@@ -3,322 +3,763 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RetinaGuard — AI-Assisted DR Screening Workstation</title>
+  <title>RetinaGuard — AI-Assisted Retinal Screening Workstation</title>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 
-  <!-- Top Header Navigation -->
-  <header class="app-header">
-    <div class="brand">
-      <div class="brand-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Minimal Research Header -->
+  <header class="workstation-header">
+    <div class="header-brand">
+      <div class="brand-symbol" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
-          <circle cx="12" cy="12" r="4"></circle>
-          <line x1="12" y1="2" x2="12" y2="4"></line>
-          <line x1="12" y1="20" x2="12" y2="22"></line>
-          <line x1="2" y1="12" x2="4" y2="12"></line>
-          <line x1="20" y1="12" x2="22" y2="12"></line>
+          <circle cx="12" cy="12" r="3.5"></circle>
+          <line x1="12" y1="2" x2="12" y2="5"></line>
+          <line x1="12" y1="19" x2="12" y2="22"></line>
+          <line x1="2" y1="12" x2="5" y2="12"></line>
+          <line x1="19" y1="12" x2="22" y2="12"></line>
         </svg>
       </div>
-      <div>
-        <h1 class="brand-title">RetinaGuard</h1>
-        <p class="brand-subtitle">AI-Assisted Retinal Screening Workstation &bull; SIH 2026</p>
+      <div class="brand-text">
+        <span class="brand-name">RetinaGuard</span>
+        <span class="brand-tag">AI-Assisted Retinal Screening</span>
       </div>
     </div>
     
-    <div class="header-meta">
-      <div class="meta-tag model-badge"><span class="pulse-dot"></span> Model: <strong>EXP-001 (EfficientNet-B0)</strong></div>
-      <div class="meta-tag mode-badge">Mode: <strong>OFFLINE</strong></div>
-      <button class="btn btn-outline" id="btn-about" title="About System">About</button>
+    <div class="header-controls">
+      <div class="status-pill status-offline" title="Fully Offline Inference System">
+        <span class="status-dot"></span>
+        <span>OFFLINE</span>
+      </div>
+      <div class="status-pill model-tag" title="Deep Learning Backbone Model">
+        <span class="model-label">Backbone</span>
+        <span class="model-val">EXP-001 (EfficientNet-B0)</span>
+      </div>
+      <button class="nav-btn" id="btn-validation" title="Model Validation &amp; Held-Out Metrics">Research &amp; Validation</button>
+      <button class="nav-btn" id="btn-about" title="About RetinaGuard Workstation">About</button>
     </div>
   </header>
 
-  <!-- Sub-Header Clinical Control Bar -->
-  <section class="control-bar">
-    <div class="patient-fields">
-      <div class="field-group">
-        <label>Patient ID</label>
-        <input type="text" id="input-patient-id" value="PT-82910">
-      </div>
-      <div class="field-group">
-        <label>Exam ID</label>
-        <input type="text" id="input-exam-id" value="EX-00412">
-      </div>
-      <div class="field-group">
-        <label>Eye</label>
-        <select id="select-eye">
-          <option value="Right (OD)">Right (OD)</option>
-          <option value="Left (OS)">Left (OS)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="action-fields">
-      <div class="demo-selector-group">
-        <label>Curated Demo Scenarios</label>
-        <div class="input-with-button">
-          <select id="select-demo-case">
-            <option value="">-- Choose authentic demo case --</option>
+  <!-- Compact Patient & Acquisition Strip -->
+  <section class="control-strip">
+    <div class="strip-container">
+      
+      <!-- Patient Metadata (Compact) -->
+      <div class="patient-compact-group">
+        <div class="input-cell">
+          <label for="input-patient-id">Patient ID</label>
+          <input type="text" id="input-patient-id" value="PT-82910" spellcheck="false">
+        </div>
+        <div class="input-cell">
+          <label for="input-exam-id">Exam ID</label>
+          <input type="text" id="input-exam-id" value="EX-00412" spellcheck="false">
+        </div>
+        <div class="input-cell">
+          <label for="select-eye">Orientation</label>
+          <select id="select-eye">
+            <option value="Right (OD)">OD (Right Eye)</option>
+            <option value="Left (OS)">OS (Left Eye)</option>
           </select>
-          <button class="btn btn-secondary" id="btn-load-demo">Load Demo</button>
         </div>
       </div>
 
-      <div class="upload-group">
-        <label>Or Upload Clinical Scan</label>
-        <input type="file" id="file-upload" accept=".jpg,.jpeg,.png,.tif,.tiff" style="display: none;">
-        <button class="btn btn-secondary" id="btn-trigger-upload">Upload File</button>
+      <div class="strip-divider" aria-hidden="true"></div>
+
+      <!-- Demo Case & File Upload Controls -->
+      <div class="acquisition-group">
+        <div class="demo-select-wrap">
+          <label for="select-demo-case">Authentic Reference Cases</label>
+          <div class="input-combo">
+            <select id="select-demo-case">
+              <option value="">Select Reference Case (1–6)</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" id="btn-load-demo">Load Case</button>
+          </div>
+        </div>
+
+        <div class="file-upload-wrap">
+          <label>&nbsp;</label>
+          <input type="file" id="file-upload" accept=".jpg,.jpeg,.png,.tif,.tiff" style="display: none;">
+          <button class="btn btn-secondary" id="btn-trigger-upload">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: -2px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Upload Scan
+          </button>
+        </div>
       </div>
 
-      <div class="analyze-group">
+      <!-- Visually Dominant Red Action Button -->
+      <div class="action-cell">
         <label>&nbsp;</label>
-        <button class="btn btn-primary btn-analyze" id="btn-analyze" disabled>
+        <button class="btn btn-action-red" id="btn-analyze" disabled>
           <span id="analyze-spinner" class="spinner" style="display: none;"></span>
-          <span id="analyze-text">Analyze Image ▶</span>
+          <span id="analyze-text">Analyze Scan ▶</span>
         </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN WORKSTATION SHELL: FIXED LEFT CANVAS / SCROLLABLE RIGHT PANEL     -->
+  <!-- ===================================================================== -->
+  <main class="workstation-shell" id="workstation-shell">
+    <div class="workstation-grid" id="workstation-grid">
+
+      <!-- ================================================================= -->
+      <!-- LEFT COLUMN: FIXED/STICKY RETINAL ANALYSIS CANVAS                 -->
+      <!-- ================================================================= -->
+      <section class="canvas-sticky-col" id="canvas-sticky-col">
+        <div class="canvas-card" id="canvas-card">
+          
+          <!-- Canvas Top Bar -->
+          <div class="canvas-header">
+            <div class="canvas-title-group">
+              <span class="canvas-kicker">WORKSTATION CANVAS</span>
+              <h2 class="canvas-heading">RETINAL ANALYSIS</h2>
+            </div>
+
+            <!-- Small Metadata: CASE • EYE • STATUS -->
+            <div class="canvas-meta-chips">
+              <span class="meta-chip" id="meta-chip-case">CASE: <strong id="val-meta-case">EX-00412</strong></span>
+              <span class="meta-chip" id="meta-chip-eye">EYE: <strong id="val-meta-eye">OD</strong></span>
+              <span class="meta-chip" id="image-meta-tag">STATUS: <strong>IDLE</strong></span>
+            </div>
+
+            <!-- Focus Evidence Mode Action -->
+            <div class="canvas-actions">
+              <button class="btn btn-focus-mode" id="btn-focus-mode" title="Focus Evidence Mode (Expand Canvas)">
+                <span class="focus-icon">⛶</span> Focus Evidence
+              </button>
+            </div>
+          </div>
+
+          <!-- Layer Navigation Tabs: ORIGINAL • ENHANCED • EVIDENCE • ATTRIBUTION -->
+          <div class="canvas-layer-strip" id="layer-toggles" style="display: none;">
+            <div class="layer-tab-group">
+              <button class="toggle-btn active" data-layer="original">ORIGINAL</button>
+              <button class="toggle-btn" data-layer="enhanced">ENHANCED</button>
+              <button class="toggle-btn" data-layer="evidence">EVIDENCE</button>
+              <button class="toggle-btn" data-layer="heatmap">ATTRIBUTION</button>
+            </div>
+
+            <!-- Attribution Class Selector (Visible when on Heatmap tab) -->
+            <div class="attr-picker-wrap" id="attribution-target-selector" style="display: none;">
+              <label for="select-target-class">Target:</label>
+              <select id="select-target-class" class="attr-select">
+                <option value="predicted">Predicted Class</option>
+                <option value="0">Grade 0: No DR</option>
+                <option value="1">Grade 1: Mild DR</option>
+                <option value="2">Grade 2: Moderate DR</option>
+                <option value="3">Grade 3: Severe DR</option>
+                <option value="4">Grade 4: Proliferative DR</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Central Retina Viewport Stage with Focus Ring -->
+          <div class="viewport-stage-wrap">
+            <div class="retina-focus-ring" id="retina-focus-ring">
+              <div class="viewport-stage" id="viewport-stage">
+                
+                <!-- Empty Placeholder -->
+                <div class="empty-placeholder" id="empty-placeholder">
+                  <div class="placeholder-glyph">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="4"></circle>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="placeholder-title">No Retinal Photograph Loaded</h3>
+                  <p class="placeholder-desc">Select an authentic reference case from above or upload a clinical fundus scan to begin analysis.</p>
+                </div>
+
+                <!-- Main Retina Image Display -->
+                <img id="main-image-view" class="main-retina-image" src="" alt="Retinal Fundus Scan" style="display: none;">
+                
+                <!-- Interactive Evidence SVG Overlay for Bounding Box Highlights -->
+                <svg id="evidence-svg-overlay" class="evidence-svg-overlay" style="display: none;"></svg>
+
+                <!-- Subtle Analysis Scan Line Animation -->
+                <div class="analysis-scan-line" id="analysis-scan-line" style="display: none;"></div>
+
+                <!-- Processing Overlay -->
+                <div class="processing-overlay" id="processing-overlay" style="display: none;">
+                  <div class="loader-ring"></div>
+                  <p id="processing-status-text" class="processing-title">Analyzing Retinal Scan...</p>
+                  <p class="processing-sub">Quality Gate &bull; CLAHE &bull; Anatomy &bull; Candidate Evidence &bull; EXP-001 &bull; Grad-CAM++ &bull; ExplainAI</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas Subbar: Legends & Active Highlight Indicator -->
+          <div class="canvas-subbar">
+            <!-- Active Evidence Inspector Feedback -->
+            <div id="active-evidence-indicator" class="active-evidence-indicator" style="display: none;">
+              <span class="indicator-badge">SELECTED EVIDENCE:</span>
+              <span id="active-evidence-title" class="indicator-title">--</span>
+              <span id="active-evidence-coords" class="indicator-coords">--</span>
+              <button class="indicator-clear" id="btn-clear-evidence" title="Clear Region Highlight">&times;</button>
+            </div>
+
+            <!-- Dynamic Color Legend -->
+            <div id="layer-legend" class="layer-legend" style="display: none;"></div>
+
+            <!-- Ungradable Safety Alert -->
+            <div id="safety-alert-box" class="callout callout-danger" style="display: none;"></div>
+
+            <!-- Borderline Quality Notice -->
+            <div id="borderline-alert-box" class="callout callout-warning" style="display: none;"></div>
+          </div>
+
+          <!-- Candidate Evidence Crops Gallery (Within Left Analysis Canvas) -->
+          <div class="canvas-evidence-tray" id="evidence-card" style="display: none;">
+            <div class="tray-header">
+              <div class="tray-title-row">
+                <span class="tray-title">CANDIDATE LESION EVIDENCE</span>
+                <span class="chip chip-neutral" id="badge-crop-count">0 Candidates</span>
+              </div>
+              <button class="btn-why-text" title="Explain Candidate Evidence Methodology" data-stage="stage_8_lesion_candidates">Methodology ↗</button>
+            </div>
+            
+            <p class="tray-hint">Click any candidate cutout below to highlight its exact spatial coordinate on the retinal image above:</p>
+
+            <!-- Visual Cutouts Gallery -->
+            <div class="candidate-crops-container" id="candidate-crops-container">
+              <!-- Dynamically populated with 96x96 interactive crops -->
+            </div>
+
+            <!-- On-Demand Region Sensitivity Testing Box -->
+            <div class="canvas-sensitivity-box" id="region-sensitivity-box">
+              <div class="sensitivity-head">
+                <div>
+                  <span class="sens-title">On-Demand Region Masking Analysis</span>
+                  <div class="sens-sub">Evaluate model sensitivity when temporarily masking candidate regions without modifying weights.</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-run-sensitivity">Test Sensitivity</button>
+              </div>
+              
+              <div class="sensitivity-results-wrap" id="sensitivity-results-wrap" style="display: none;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- RIGHT COLUMN: INDEPENDENTLY SCROLLABLE INFORMATION WORKSPACE      -->
+      <!-- ================================================================= -->
+      <section class="info-scroll-col" id="info-scroll-col">
+        
+        <!-- SECTION 1: AI SCREENING RESULT (DECISION CORE) -->
+        <div class="card result-decision-card">
+          <div class="card-header-clean">
+            <span class="section-kicker">DECISION CORE</span>
+            <div class="header-action-row">
+              <span id="badge-referral-status" class="chip chip-neutral">PENDING</span>
+              <button class="btn-why-text" title="Explain EXP-001 Classification" data-stage="stage_9_classifier_grading">Why? ↗</button>
+            </div>
+          </div>
+
+          <div class="card-body-tight">
+            
+            <!-- Compact Status Rail: QUALITY ✓ • EVIDENCE ✓ • MODEL ✓ • XAI ✓ -->
+            <div class="status-rail" id="status-rail">
+              <div class="rail-item" id="rail-quality">
+                <span class="rail-dot"></span> <span class="rail-label">QUALITY</span> <span class="rail-check">✓</span>
+              </div>
+              <div class="rail-divider"></div>
+              <div class="rail-item" id="rail-evidence">
+                <span class="rail-dot"></span> <span class="rail-label">EVIDENCE</span> <span class="rail-check">✓</span>
+              </div>
+              <div class="rail-divider"></div>
+              <div class="rail-item" id="rail-model">
+                <span class="rail-dot"></span> <span class="rail-label">MODEL</span> <span class="rail-check">✓</span>
+              </div>
+              <div class="rail-divider"></div>
+              <div class="rail-item" id="rail-xai">
+                <span class="rail-dot"></span> <span class="rail-label">XAI</span> <span class="rail-check">✓</span>
+              </div>
+            </div>
+
+            <!-- Primary Grade Headline Banner -->
+            <div class="prediction-headline-block" id="grade-banner">
+              <div class="pred-label">AI SCREENING RESULT</div>
+              <h1 class="pred-grade-name" id="text-grade-headline">Awaiting Analysis</h1>
+              <div class="pred-meta-line" id="text-grade-confidence">Load a scan and execute screening</div>
+              <div class="pred-calibration-tag" id="text-calibration-status">Calibration: not applied (raw model probabilities)</div>
+            </div>
+
+            <!-- Grade 0 -> Grade 4 Severity Progression Scale -->
+            <div class="icdr-scale-wrapper" id="icdr-scale-wrapper">
+              <div class="track-title">ICDR Severity Progression</div>
+              <div class="icdr-progression-track">
+                <div class="icdr-step" data-grade="0">
+                  <span class="step-num">0</span>
+                  <span class="step-text">No DR</span>
+                </div>
+                <div class="icdr-step" data-grade="1">
+                  <span class="step-num">1</span>
+                  <span class="step-text">Mild</span>
+                </div>
+                <div class="icdr-step" data-grade="2">
+                  <span class="step-num">2</span>
+                  <span class="step-text">Moderate</span>
+                </div>
+                <div class="icdr-step" data-grade="3">
+                  <span class="step-num">3</span>
+                  <span class="step-text">Severe</span>
+                </div>
+                <div class="icdr-step" data-grade="4">
+                  <span class="step-num">4</span>
+                  <span class="step-text">Proliferative</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Decision Margin Box -->
+            <div class="margin-indicator-card" id="margin-indicator-card" style="display: none;">
+              <span class="margin-label">Top-2 Decision Margin:</span>
+              <span class="margin-val" id="val-decision-margin">--% margin over runner-up</span>
+            </div>
+
+            <!-- Authentic Reference vs AI Model Comparison (Demo Mode) -->
+            <div class="demo-comparison-box" id="demo-comparison-box" style="display: none;">
+              <div class="comp-item">
+                <span class="comp-label">Curated Reference Label</span>
+                <span class="comp-val" id="val-reference-grade">--</span>
+              </div>
+              <div class="comp-item">
+                <span class="comp-label">Model Prediction</span>
+                <span class="comp-val comp-ai" id="val-ai-prediction">--</span>
+              </div>
+            </div>
+
+            <!-- Full 5-Class Probability Distribution Stack -->
+            <div class="probabilities-section" id="probabilities-section" style="display: none;">
+              <div class="section-subhead">5-Class Model Output Distribution</div>
+              <div class="prob-bars-container" id="prob-bars-container">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Screening Interpretation Box -->
+            <div class="recommendation-box" id="recommendation-box">
+              <div class="rec-title" id="rec-title">Standard Triage Recommendation</div>
+              <div class="rec-body" id="rec-body">Upload or select a case to generate AI-assisted screening interpretation.</div>
+              <div class="rec-rule" id="rec-rule">Configured prototype screening rule: Grade &ge; 2 triggers referable triage.</div>
+            </div>
+
+            <!-- PRIMARY INTERACTION: "WHY THIS RESULT →" EXPLAINAI ACTION -->
+            <div class="explain-primary-action">
+              <button class="btn btn-why-this-result" id="btn-open-explain">
+                <span class="btn-text">WHY THIS RESULT →</span>
+                <span class="btn-subtext">Inspect deterministic, evidence-grounded ExplainAI reasoning</span>
+              </button>
+            </div>
+
+            <!-- Report Export Actions -->
+            <div class="report-action-bar" id="report-action-bar" style="display: none;">
+              <a id="btn-view-report" class="btn btn-secondary btn-sm" target="_blank" href="#">View Full Report ↗</a>
+              <a id="btn-download-report" class="btn btn-secondary btn-sm" href="#" download>Download PDF</a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 2: IMAGE QUALITY GATE (COMPACT + EXPANDABLE) -->
+        <div class="card info-card">
+          <div class="card-header-clean">
+            <div class="title-with-badge">
+              <span class="section-kicker">OPTICAL GATE</span>
+              <h3 class="card-title">Image Quality Assessment</h3>
+            </div>
+            <div class="header-action-row">
+              <span id="badge-quality-status" class="chip chip-neutral">PENDING</span>
+              <button class="btn-inspect" id="btn-inspect-quality">Quality Details →</button>
+            </div>
+          </div>
+
+          <div class="card-body-tight">
+            <div class="quality-score-summary">
+              <div class="score-num-wrap">
+                <span class="score-large" id="val-quality-score">--</span>
+                <span class="score-denom">/ 100</span>
+              </div>
+              <div class="meter-bar-track">
+                <div id="quality-meter-fill" class="meter-bar-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Expandable Quality Metrics -->
+            <div class="expandable-panel" id="panel-quality-details" style="display: none;">
+              <div class="metrics-grid">
+                <div class="metric-item">
+                  <span class="m-label">Sharpness</span>
+                  <span class="m-val" id="val-q-focus">--</span>
+                  <span class="m-sub" id="sub-q-sharpness">Laplacian Var: --</span>
+                </div>
+                <div class="metric-item">
+                  <span class="m-label">Illumination</span>
+                  <span class="m-val" id="val-q-illum">--</span>
+                  <span class="m-sub" id="sub-q-illum">Mean Lum: --</span>
+                </div>
+                <div class="metric-item">
+                  <span class="m-label">Contrast</span>
+                  <span class="m-val" id="val-q-contrast">--</span>
+                  <span class="m-sub" id="sub-q-contrast">Std Dev: --</span>
+                </div>
+                <div class="metric-item">
+                  <span class="m-label">Retinal FOV</span>
+                  <span class="m-val" id="val-q-fov">--</span>
+                  <span class="m-sub" id="sub-q-fov">Coverage: --</span>
+                </div>
+              </div>
+
+              <div class="quality-note-box" id="box-quality-reason" style="display: none;">
+                <strong>Finding:</strong> <span id="text-quality-reason">--</span>
+                <div id="text-quality-threshold" class="threshold-note">Configured prototype threshold: minimum score 40.0, sharpness variance &ge; 35.0.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: CANDIDATE LESION EVIDENCE SUMMARY -->
+        <div class="card info-card">
+          <div class="card-header-clean">
+            <div class="title-with-badge">
+              <span class="section-kicker">EVIDENCE ANALYSIS</span>
+              <h3 class="card-title">Candidate Lesion Evidence Summary</h3>
+            </div>
+            <div class="header-action-row">
+              <span id="badge-lesion-mode" class="chip chip-neutral">PENDING</span>
+              <button class="btn-inspect" id="btn-inspect-evidence">Evidence Details →</button>
+            </div>
+          </div>
+
+          <div class="card-body-tight">
+            <div class="evidence-stats-grid">
+              <div class="stat-cell">
+                <span class="stat-name">Microaneurysms</span>
+                <span class="stat-val" id="val-ma-count">--</span>
+                <span class="stat-sub" id="val-ma-notes">Candidate findings</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-name">Hard Exudates</span>
+                <span class="stat-val" id="val-ex-count">--</span>
+                <span class="stat-sub" id="val-ex-notes">Candidate findings</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-name">Hemorrhages</span>
+                <span class="stat-val" id="val-he-count">--</span>
+                <span class="stat-sub" id="val-he-notes">Candidate findings</span>
+              </div>
+              <div class="stat-cell" id="row-soft-exudates">
+                <span class="stat-name">Soft Exudates</span>
+                <span class="stat-val" id="val-se-count">--</span>
+                <span class="stat-sub" id="val-se-notes">Cotton wool spots</span>
+              </div>
+            </div>
+
+            <!-- Expandable Evidence & Landmarks Details -->
+            <div class="expandable-panel" id="panel-evidence-details" style="display: none;">
+              <div class="evidence-stats-grid" style="margin-top: 8px;">
+                <div class="stat-cell">
+                  <span class="stat-name">Vessel Density</span>
+                  <span class="stat-val" id="val-vessel-density">--</span>
+                  <span class="stat-sub">Active retinal area</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-name">NV Risk Indicator</span>
+                  <span class="stat-val" id="val-nv-risk">--</span>
+                  <span class="stat-sub">Vessel density heuristic</span>
+                </div>
+              </div>
+
+              <div class="landmarks-strip">
+                <div><strong>Optic Disc:</strong> <span id="val-od-status">--</span> <small id="val-od-details" class="text-muted">(Masked)</small></div>
+                <div><strong>Fovea Centralis:</strong> <span id="val-fovea-status">--</span> <small id="val-fovea-details" class="text-muted">(Projection)</small></div>
+              </div>
+
+              <div class="evidence-disclaimer">
+                Notice: Candidate findings are identified by morphological feature extraction and U-Net candidate detection; they do not constitute confirmed clinical lesion segmentations.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 4: ANALYSIS TRACE (REAL RUNTIME TIMINGS) -->
+        <div class="card info-card">
+          <div class="card-header-clean">
+            <div class="title-with-badge">
+              <span class="section-kicker">EXECUTION TRACE</span>
+              <h3 class="card-title">Analysis Trace &amp; Latency</h3>
+            </div>
+            <button class="btn-inspect" id="btn-inspect-trace">Trace Details →</button>
+          </div>
+
+          <div class="card-body-tight">
+            <div class="trace-summary-row">
+              <span>Total Pipeline Latency:</span>
+              <strong id="val-trace-total">-- ms</strong>
+            </div>
+
+            <div class="expandable-panel" id="panel-trace-details" style="display: none;">
+              <div class="trace-grid">
+                <div class="trace-cell"><span>Quality Gate:</span> <strong id="trace-quality">-- ms</strong></div>
+                <div class="trace-cell"><span>Enhancement:</span> <strong id="trace-enhancement">-- ms</strong></div>
+                <div class="trace-cell"><span>Anatomy:</span> <strong id="trace-anatomy">-- ms</strong></div>
+                <div class="trace-cell"><span>Evidence:</span> <strong id="trace-evidence">-- ms</strong></div>
+                <div class="trace-cell"><span>Grading (EXP-001):</span> <strong id="trace-grading">-- ms</strong></div>
+                <div class="trace-cell"><span>Attribution (XAI):</span> <strong id="trace-attribution">-- ms</strong></div>
+                <div class="trace-cell"><span>Report:</span> <strong id="trace-report">-- ms</strong></div>
+              </div>
+              <div class="trace-note">All timings are measured CPU execution latencies from the unified AnalysisResult contract.</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- "How RetinaGuard Works" Bottom Pipeline Flow                          -->
+  <!-- ===================================================================== -->
+  <section class="pipeline-section">
+    <div class="pipeline-inner">
+      <div class="pipeline-header-row">
+        <div>
+          <h2 class="pipeline-title">How RetinaGuard Works</h2>
+          <p class="pipeline-subtitle">End-to-end transparent, multi-stage screening pipeline. Click any stage to inspect algorithm parameters, evidence, and limitations.</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="btn-stages">View Full Transparency Registry</button>
+      </div>
+
+      <div class="pipeline-flow-track" id="pipeline-stepper">
+        
+        <div class="flow-stage step-node" data-stage="stage_1_quality_gate" role="button" tabindex="0">
+          <span class="stage-order">1</span>
+          <div class="stage-info">
+            <span class="stage-name">Quality Gate</span>
+            <span class="stage-sub">Optical validation</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_5_clahe" role="button" tabindex="0">
+          <span class="stage-order">2</span>
+          <div class="stage-info">
+            <span class="stage-name">Enhancement</span>
+            <span class="stage-sub">CLAHE green-channel</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_7_anatomical_landmarks" role="button" tabindex="0">
+          <span class="stage-order">3</span>
+          <div class="stage-info">
+            <span class="stage-name">Anatomy</span>
+            <span class="stage-sub">Disc, fovea, vessels</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_8_lesion_candidates" role="button" tabindex="0">
+          <span class="stage-order">4</span>
+          <div class="stage-info">
+            <span class="stage-name">Evidence</span>
+            <span class="stage-sub">Candidate lesions</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_9_classifier_grading" role="button" tabindex="0">
+          <span class="stage-order">5</span>
+          <div class="stage-info">
+            <span class="stage-name">Grading</span>
+            <span class="stage-sub">EXP-001 EfficientNet</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_10_explainability" role="button" tabindex="0">
+          <span class="stage-order">6</span>
+          <div class="stage-info">
+            <span class="stage-name">Attribution</span>
+            <span class="stage-sub">Grad-CAM++ (XAI)</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_11_screening_interpretation" role="button" tabindex="0">
+          <span class="stage-order">7</span>
+          <div class="stage-info">
+            <span class="stage-name">ExplainAI</span>
+            <span class="stage-sub">Grounded reasoning</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+
+        <div class="flow-stage step-node" data-stage="stage_12_reporting" role="button" tabindex="0">
+          <span class="stage-order">8</span>
+          <div class="stage-info">
+            <span class="stage-name">Report</span>
+            <span class="stage-sub">Printable clinical HTML</span>
+          </div>
+          <span class="flow-why">Why?</span>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- Main Workstation Canvas -->
-  <main class="workstation-container">
-    
-    <!-- LEFT: Image Viewport & Layer Controls -->
-    <section class="viewport-column">
-      <div class="card viewport-card">
-        <div class="card-header viewport-header">
-          <div class="viewport-title-group">
-            <span class="card-title">Retinal Image Workspace</span>
-            <span id="image-meta-tag" class="badge badge-neutral">No Image Loaded</span>
-          </div>
-
-          <!-- Layer Toggles -->
-          <div class="layer-toggle-group" id="layer-toggles" style="display: none;">
-            <button class="toggle-btn active" data-layer="original">Original</button>
-            <button class="toggle-btn" data-layer="enhanced">Enhanced</button>
-            <button class="toggle-btn" data-layer="vessels">Vessels</button>
-            <button class="toggle-btn" data-layer="lesions">Lesions</button>
-            <button class="toggle-btn" data-layer="heatmap">Heatmap (Grad-CAM)</button>
-          </div>
-        </div>
-
-        <!-- Central Image Viewport -->
-        <div class="viewport-stage" id="viewport-stage">
-          <div class="empty-placeholder" id="empty-placeholder">
-            <div class="placeholder-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#656d76" stroke-width="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-            </div>
-            <h3>No Fundus Image Selected</h3>
-            <p>Select a scenario from the Demo dropdown or upload a raw fundus camera photograph to begin.</p>
-          </div>
-
-          <img id="main-image-view" class="main-retina-image" src="" alt="Retinal Fundus View" style="display: none;">
-          
-          <!-- Processing Overlay -->
-          <div class="processing-overlay" id="processing-overlay" style="display: none;">
-            <div class="pulse-loader"></div>
-            <p id="processing-status-text">Executing Multi-Stage Screening Pipeline...</p>
-            <small>Quality Gate &bull; CLAHE &bull; Landmarks &bull; Lesions &bull; EXP-001 &bull; Grad-CAM</small>
-          </div>
-        </div>
-
-        <!-- Viewport Footer / Dynamic Legends -->
-        <div class="viewport-footer">
-          <div id="layer-legend" class="legend-box" style="display: none;">
-            <!-- Injected dynamically via JS -->
-          </div>
-
-          <div id="safety-alert-box" class="alert-box alert-danger" style="display: none;">
-            <!-- Injected if Ungradable -->
-          </div>
-
-          <div id="borderline-alert-box" class="alert-box alert-warning" style="display: none;">
-            <!-- Injected if Borderline -->
-          </div>
-        </div>
+  <!-- Restrained Medical Disclaimer Footer -->
+  <footer class="workstation-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <strong>CLINICAL DECISION SUPPORT NOTICE:</strong> RetinaGuard 2.0 is an AI-assisted diabetic retinopathy screening decision-support research prototype. It does not provide autonomous clinical diagnoses. All candidate findings, classifications, and referral actions must be independently confirmed by an ophthalmic healthcare professional.
       </div>
-    </section>
-
-    <!-- RIGHT: Multi-Panel Clinical Findings -->
-    <aside class="findings-column">
-      
-      <!-- Panel 1: Image Quality Assessment -->
-      <div class="card findings-card">
-        <div class="card-header">
-          <span class="card-title">1. Image Quality Assessment</span>
-          <span id="badge-quality-status" class="badge badge-neutral">PENDING</span>
-        </div>
-        <div class="card-body">
-          <div class="score-row">
-            <div>
-              <div class="sub-label">Overall Quality Score</div>
-              <div class="big-score"><span id="val-quality-score">--</span> <small>/ 100</small></div>
-            </div>
-            <div class="quality-meter-wrap">
-              <div class="quality-meter-bar">
-                <div id="quality-meter-fill" class="quality-meter-fill" style="width: 0%;"></div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="metrics-grid">
-            <div class="metric-item">
-              <span class="metric-name">Focus / Sharpness</span>
-              <span class="metric-val" id="val-q-focus">--</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-name">Illumination</span>
-              <span class="metric-val" id="val-q-illum">--</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-name">Contrast</span>
-              <span class="metric-val" id="val-q-contrast">--</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-name">Field of View (FOV)</span>
-              <span class="metric-val" id="val-q-fov">--</span>
-            </div>
-          </div>
-
-          <div class="quality-note" id="box-quality-reason" style="display: none;">
-            <strong>Quality Finding:</strong> <span id="text-quality-reason">--</span>
-          </div>
-        </div>
+      <div class="footer-right">
+        <span>SIH 2026 PS: SIH26038 &bull; Team VyuhaX</span>
       </div>
-
-      <!-- Panel 2: DR Severity & Screening Result -->
-      <div class="card findings-card severity-card">
-        <div class="card-header">
-          <span class="card-title">2. DR Severity Classification</span>
-          <span id="badge-referral-status" class="badge badge-neutral">PENDING</span>
-        </div>
-        <div class="card-body severity-card-body">
-          <div class="severity-scroll-container">
-            <div class="grade-banner" id="grade-banner">
-              <div class="grade-prefix">ICDR DR Screening Severity</div>
-              <div class="grade-headline" id="text-grade-headline">Awaiting Analysis</div>
-              <div class="grade-subtext" id="text-grade-confidence">Run screening to evaluate fundus image</div>
-            </div>
-
-            <!-- Class Probabilities Distribution -->
-            <div class="probabilities-section" id="probabilities-section" style="display: none;">
-              <div class="sub-label" style="margin-bottom: 6px;">EXP-001 Softmax Probabilities</div>
-              <div id="prob-bars-container" class="prob-bars-container">
-                <!-- Injected dynamically -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel 3: Retinal Landmarks & Lesion Candidates -->
-      <div class="card findings-card landmarks-card">
-        <div class="card-header">
-          <span class="card-title">3. Landmarks & Lesion Candidates</span>
-        </div>
-        <div class="card-body landmarks-card-body">
-          <div class="landmarks-scroll-container">
-            <table class="clinical-table">
-              <thead>
-                <tr>
-                  <th>Feature</th>
-                  <th>Status / Count</th>
-                  <th>Analysis Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Optic Disc</td>
-                  <td id="val-od-status">--</td>
-                  <td id="val-od-details">Morphological Peak Luminance</td>
-                </tr>
-                <tr>
-                  <td>Fovea Centralis</td>
-                  <td id="val-fovea-status">--</td>
-                  <td id="val-fovea-details">Temporal Geometric Projection</td>
-                </tr>
-                <tr>
-                  <td>Retinal Vessels</td>
-                  <td id="val-vessel-density">--</td>
-                  <td>Vascular Density (% surface)</td>
-                </tr>
-                <tr>
-                  <td>Microaneurysms</td>
-                  <td id="val-ma-count">--</td>
-                  <td>Candidate Detection (Top-hat)</td>
-                </tr>
-                <tr>
-                  <td>Hard Exudates</td>
-                  <td id="val-ex-count">--</td>
-                  <td>Candidate Detection (Disc-masked)</td>
-                </tr>
-                <tr>
-                  <td>Hemorrhages</td>
-                  <td id="val-he-count">--</td>
-                  <td>Candidate Detection (Dark lesions)</td>
-                </tr>
-                <tr>
-                  <td>NV Risk Indicator</td>
-                  <td id="val-nv-risk">--</td>
-                  <td>Vessel Density Stratification</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel 4: Clinical Recommendation & Report Export -->
-      <div class="card findings-card">
-        <div class="card-header">
-          <span class="card-title">4. Screening Recommendation</span>
-        </div>
-        <div class="card-body">
-          <div class="recommendation-box" id="recommendation-box">
-            <div class="rec-title" id="rec-title">Standard Triage Recommendation</div>
-            <div class="rec-body" id="rec-body">Upload or load an image to receive clinical triage guidance.</div>
-          </div>
-
-          <div class="report-action-bar" id="report-action-bar" style="display: none;">
-            <a id="btn-view-report" class="btn btn-secondary" target="_blank" href="#">View Full Report ↗</a>
-            <a id="btn-download-report" class="btn btn-primary" href="#" download>Download HTML Report</a>
-          </div>
-        </div>
-      </div>
-
-    </aside>
-  </main>
-
-  <!-- Bottom Medical Disclaimer Bar -->
-  <footer class="app-footer">
-    <div class="disclaimer-text">
-      <strong>IMPORTANT CLINICAL DISCLAIMER:</strong> RetinaGuard is an AI-assisted diabetic retinopathy screening decision-support prototype (Version 1.0.0). It does NOT provide an autonomous medical diagnosis. All findings, candidate lesion counts, and recommendations must be confirmed by a licensed ophthalmologist before clinical management decisions are undertaken.
     </div>
   </footer>
 
-  <!-- About Modal -->
-  <div class="modal-overlay" id="about-modal" style="display: none;">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>About RetinaGuard</h3>
-        <button class="modal-close" id="btn-close-about">&times;</button>
+  <!-- ===================================================================== -->
+  <!-- MODAL / DRAWER: ExplainAI "Why this result?" Slide-Over Drawer         -->
+  <!-- ===================================================================== -->
+  <div class="drawer-backdrop" id="explainai-drawer-overlay" style="display: none;">
+    <div class="drawer-panel" id="explainai-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <div class="drawer-kicker">ExplainAI Grounded Reasoning</div>
+          <h3 class="drawer-title">Why this result?</h3>
+          <p class="drawer-sub">Deterministic clinical explanations generated strictly from AnalysisResult facts without cloud LLMs or hallucinations.</p>
+        </div>
+        <button class="drawer-close-btn" id="btn-close-explain" aria-label="Close ExplainAI Drawer">&times;</button>
       </div>
-      <div class="modal-body">
-        <p><strong>RetinaGuard</strong> is an edge-deployable, offline-first screening workstation developed for the Smart India Hackathon (SIH 2026).</p>
-        <p><strong>Production Model:</strong> EXP-001 (EfficientNet-B0 with Focal Loss, balanced sampling). Validated on 733 held-out test scans: QWK = 0.7342, Accuracy = 69.85%, Referable Sensitivity = 78.86%, Specificity = 92.64%.</p>
-        <p><strong>Core Capabilities:</strong></p>
-        <ul>
-          <li>Image Quality Assessment & Early Rejection on Ungradable Images</li>
-          <li>Contrast-Limited Adaptive Histogram Equalization (CLAHE)</li>
-          <li>Optic Disc, Fovea, & Retinal Vessel Segmentation</li>
-          <li>Microaneurysm, Disc-Excluded Hard Exudate, & Hemorrhage Candidate Detection</li>
-          <li>True Grad-CAM Gradient Activation Saliency Maps</li>
-          <li>Automated Clinical Screening Reports & Referable DR Triage</li>
+
+      <div class="drawer-body">
+        <div id="explainai-qa-list" class="explainai-qa-list">
+          <div class="empty-state-text">Run screening analysis to generate evidence-grounded clinical explanations.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: Pipeline Stage Transparency Details                            -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="stage-modal" style="display: none;">
+    <div class="modal-window modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="chip chip-primary" id="modal-stage-category">Category</span>
+          <h3 id="modal-stage-name" class="modal-title">Pipeline Stage Transparency</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-stage">&times;</button>
+      </div>
+      <div class="modal-content">
+        <div class="stage-detail-block">
+          <div class="detail-label">What It Does:</div>
+          <p id="modal-stage-what" class="detail-body">--</p>
+        </div>
+        <div class="stage-detail-block">
+          <div class="detail-label">Why It Is Used:</div>
+          <p id="modal-stage-why" class="detail-body">--</p>
+        </div>
+        <div class="stage-detail-block">
+          <div class="detail-label">Actual Executed Parameters:</div>
+          <pre id="modal-stage-params" class="code-box">{}</pre>
+        </div>
+        <div class="stage-detail-block">
+          <div class="detail-label">What Changed In Image:</div>
+          <p id="modal-stage-changed" class="detail-body">--</p>
+        </div>
+        <div class="stage-detail-block limitation-block">
+          <div class="detail-label" style="color: #b45309;">Algorithmic &amp; Clinical Limitation:</div>
+          <p id="modal-stage-limitation" class="detail-body" style="color: #4b5563;">--</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: Secondary Research & Verification View                         -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="validation-modal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">EXP-001 Held-Out Validation &amp; Architecture Metrics</h3>
+        <button class="modal-close-btn" id="btn-close-validation">&times;</button>
+      </div>
+      <div class="modal-content">
+        <p class="modal-desc">Empirical performance metrics from 733 held-out test scans (APTOS 2019 blind test split):</p>
+        
+        <table class="research-table">
+          <thead>
+            <tr><th>Metric</th><th>Empirical Value</th><th>Clinical Significance</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Quadratic Weighted Kappa (QWK)</td><td><strong>0.7342</strong></td><td>High inter-rater agreement with retina specialist consensus</td></tr>
+            <tr><td>Overall 5-Class Accuracy</td><td><strong>69.85%</strong></td><td>Exact ICDR multi-class grading accuracy</td></tr>
+            <tr><td>Referable DR Sensitivity (Grade &ge; 2)</td><td><strong>78.86%</strong></td><td>Identifies patients requiring specialist clinical referral</td></tr>
+            <tr><td>Referable DR Specificity</td><td><strong>92.64%</strong></td><td>Prevents unnecessary clinic over-referrals</td></tr>
+            <tr><td>Macro F1-Score</td><td><strong>0.4981</strong></td><td>Balanced evaluation across rare severe disease presentations</td></tr>
+          </tbody>
+        </table>
+
+        <div class="research-note">
+          <strong>Backbone Specifications:</strong> EfficientNet-B0 (ImageNet initialized, fine-tuned with Focal Loss &gamma;=2.0, balanced class sampling). Fully compatible with ONNX edge execution and PyTorch gradient attribution.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: About RetinaGuard Workstation                                  -->
+  <!-- ===================================================================== -->
+  <div class="modal-backdrop" id="about-modal" style="display: none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3 class="modal-title">About RetinaGuard Workstation</h3>
+        <button class="modal-close-btn" id="btn-close-about">&times;</button>
+      </div>
+      <div class="modal-content">
+        <p><strong>RetinaGuard 2.0</strong> is an edge-deployable, offline-first diabetic retinopathy screening workstation developed for the Smart India Hackathon (SIH 2026, Problem Statement: SIH26038, Team VyuhaX).</p>
+        
+        <h4 style="margin: 14px 0 8px; color: #000; font-size: 13px;">Key Architectural Pillars:</h4>
+        <ul style="padding-left: 20px; line-height: 1.7; color: #374151;">
+          <li><strong>Single Source of Truth:</strong> Unified <code>AnalysisResult</code> contract guarantees strict parity across UI, ExplainAI, and clinical reports.</li>
+          <li><strong>Real Attribution Explainability:</strong> Primary Grad-CAM++ with higher-order gradients and real Grad-CAM fallback (zero fabricated heatmaps).</li>
+          <li><strong>Candidate Evidence Framing:</strong> Detections framed honestly as candidate findings with localized $96 \times 96$ px visual crops.</li>
+          <li><strong>On-Demand Region Sensitivity:</strong> Evaluates model sensitivity to candidate region masking without altering weights.</li>
+          <li><strong>Grounded ExplainAI:</strong> Fully offline, deterministic reasoning answering 8 core screening questions strictly from verified facts.</li>
+          <li><strong>Quality Gate Safety:</strong> Halts downstream grading on ungradable fundus scans to protect patient safety.</li>
         </ul>
       </div>
     </div>

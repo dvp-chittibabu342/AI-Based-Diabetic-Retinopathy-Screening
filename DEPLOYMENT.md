@@ -1,19 +1,23 @@
-# RetinaGuard — Web Deployment & Operations Guide
+# RetinaGuard 2.0 — Web Deployment & Operations Guide
 
-> **Deploying the RetinaGuard AI-Assisted Diabetic Retinopathy Screening Web Application**  
+> **Deploying the RetinaGuard 2.0 Explainable AI-Assisted Retinal Screening Workstation**  
 > *Instructions for local execution, Docker/Linux environments, and public Render cloud deployment.*
 
 ---
 
 ## 1. System Architecture Overview
 
-RetinaGuard provides an edge-deployable, browser-based clinical screening workstation powered by **FastAPI** and the locked production **EXP-001** model (`EfficientNet-B0` exported to `models/aptos_efficientnet/best_model.onnx`).
+RetinaGuard 2.0 provides an edge-deployable, browser-based clinical screening workstation powered by **FastAPI**, the locked production **EXP-001** model (`EfficientNet-B0` exported to `models/aptos_efficientnet/best_model.onnx`), and the **IDRiD Lesion U-Net** (`models/experiments/lesion_segmentation/lesion_unet.onnx`).
 
 - **Application Module**: `webapp.main:app`
 - **Launcher**: `python webapp/run.py`
-- **Production Model**: `models/aptos_efficientnet/best_model.onnx` (Config-relative path resolution via `pathlib`)
-- **Execution Engine**: ONNX Runtime (CPU Execution Provider) with PyTorch Grad-CAM explainability
-- **Health Check**: `GET /health` (Returns `{"status": "ok", "model": "EXP-001", ...}`)
+- **Production Models**:
+  - `models/aptos_efficientnet/best_model.onnx` (Classification Backbone: EXP-001)
+  - `models/aptos_efficientnet/best_model.pt` (PyTorch weights for Grad-CAM++ attribution)
+  - `models/experiments/lesion_segmentation/lesion_unet.onnx` (Candidate Lesion Segmentation)
+- **Execution Engine**: ONNX Runtime (CPU Execution Provider) with PyTorch Grad-CAM++ higher-order explainability
+- **Central Contract**: Single shared `AnalysisResult` schema in `python/contracts/analysis_contract.py`
+- **Health Check**: `GET /health` (Returns `{"status": "ok", "system": "RetinaGuard 2.0", "model": "EXP-001", ...}`)
 - **Security & Privacy**: Zero cloud telemetry, stateless image handling, full air-gap compliance
 
 ---

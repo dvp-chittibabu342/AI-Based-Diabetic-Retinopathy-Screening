@@ -1,327 +1,255 @@
-# RetinaGuard — AI-Assisted Diabetic Retinopathy Screening System
+# RetinaGuard 2.0 — Transparent, Evidence-Centered Explainable AI-Assisted DR Screening Workstation
 
-> **SIH 2026 Problem Statement** | AI-Assisted Retinal Image Analysis Workstation  
-> *Edge-deployable screening workstation integrating deep learning classification, computer vision lesion candidates, and explainable AI.*
+> **SIH 2026 Problem Statement: SIH26038** | AI-Assisted Retinal Image Analysis Workstation  
+> **Team: VyuhaX**  
+> *Edge-deployable screening workstation integrating deep learning classification, computer vision candidate evidence, real Grad-CAM++ attribution, on-demand region sensitivity, and deterministic ExplainAI reasoning.*
 
 ---
 
 ## 1. Project Overview
 
-**RetinaGuard** is an offline-capable, clinical-grade decision support system engineered for early detection, anatomical assessment, and severity grading of Diabetic Retinopathy (DR) from digital color fundus photographs. 
+**RetinaGuard 2.0** is an offline-capable, evidence-grounded AI screening decision-support research prototype engineered for early detection, anatomical assessment, and severity grading of Diabetic Retinopathy (DR) from digital color fundus photographs.
 
-Designed for deployment in primary healthcare centers, rural clinics, and tele-ophthalmology screening camps, RetinaGuard bridges the gap between patient presentation and specialist care by providing real-time, explainable triage without requiring continuous internet connectivity.
+Designed for deployment in primary healthcare centers, rural community clinics, and mobile tele-ophthalmology screening vans, RetinaGuard 2.0 transforms AI from a black-box classifier into a transparent, multi-stage clinical screening workstation where:
+- Every image filter and preprocessing stage is documented and explainable via interactive "Why?" transparency modals.
+- Optical quality failures immediately halt downstream grading to prevent medical misdiagnosis.
+- Microvascular abnormalities are presented as **candidate evidence** with inspectable visual crops, never as autonomous confirmed lesions.
+- Neural decisions are localized using **real Grad-CAM++** attribution maps with zero synthetic/fake heatmaps.
+- Model sensitivity is verifiable on-demand through candidate region masking perturbations.
+- Healthcare screeners receive deterministic, evidence-grounded answers to 8 core clinical questions via an offline **ExplainAI** engine.
+- All UI elements, REST API responses, and printable clinical reports derive from a single unified contract: `AnalysisResult`.
 
 The system features two operational interfaces:
-1. **Localhost Web Workstation**: A modern, responsive browser interface built on FastAPI and native web standards.
+1. **Clinical Web Workstation**: An interactive, responsive browser interface built on FastAPI, vanilla CSS, and modern web standards.
 2. **MATLAB Desktop Workstation**: A standalone clinical App Designer interface supporting native MATLAB workflows.
 
 ---
 
-## 2. SIH Problem Statement Mapping
+## 2. SIH Problem Statement Mapping (SIH26038)
 
-| SIH Requirement | RetinaGuard Implementation | Verification |
+| SIH Requirement | RetinaGuard 2.0 Implementation | Verification & Evidence |
 | :--- | :--- | :--- |
-| **Automated Image Quality Assessment** | Multi-metric gate analyzing Laplacian sharpness, mean illumination, Michelson contrast, and circular Field-of-View (FOV). | Blocks ungradable images (< 40 score) to prevent misdiagnosis. |
-| **Image Preprocessing & Enhancement** | Green-channel extraction, circular FOV border masking, and Contrast Limited Adaptive Histogram Equalization (CLAHE). | Calibrated 2.2 clip limit on 8×8 contextual grid. |
-| **Anatomical Landmark Detection** | Morphological peak localization for Optic Disc (OD), temporal geometric projection for Fovea, and vessel segmentation for vascular density %. | Fully automated with disc exclusion mask generation. |
-| **Lesion Candidate Detection** | Top-hat morphological filtering for microaneurysms, luminance thresholding with disc masking for hard exudates, and dark-lesion segmentation for hemorrhages. | Candidate detection counts and Neovascularization Risk Indicator. |
-| **Multi-Class DR Severity Grading** | 5-class International Clinical Diabetic Retinopathy (ICDR) grading (Grades 0 to 4) using locked production model **EXP-001** (`EfficientNet-B0`). | $\text{QWK} = 0.7342$, $\text{Accuracy} = 69.85\%$, $\text{Macro F1} = 0.4981$. |
-| **Clinical Decision Support & Triage** | Automated binary referral classification (Grade $\ge 2$ = Referable DR), urgency guidelines, and follow-up intervals. | $\text{Sensitivity} = 78.86\%$, $\text{Specificity} = 92.64\%$. |
-| **Explainable AI (XAI)** | Full gradient-weighted class activation mapping (Grad-CAM) overlaid directly onto the retinal image. | PyTorch backward pass targeting final convolutional feature maps (`backbone.0.8`). |
-| **Auditable Clinical Reporting** | Automated, print-ready, self-contained HTML medical screening report with patient metadata, image metrics, and legal disclaimers. | Exportable and downloadable directly from workstation UI. |
+| **Automated Image Quality Assessment** | Multi-metric optical gate analyzing Laplacian sharpness, green-channel illumination, contrast, and circular Field-of-View (FOV). | Automatically halts downstream inference on ungradable scans (< 40.0 score) with actionable recapture guidance. |
+| **Image Preprocessing & Enhancement** | Circular aperture border extraction, canonical resolution standardization, and green-channel CLAHE (`clipLimit=2.0`, `tileGrid=8x8`). | Documented in 12-stage pipeline transparency registry with "Why?" UI inspector. |
+| **Anatomical Landmark Detection** | Morphological peak localization for Optic Disc (OD), temporal geometric projection for Fovea Centralis, and vascular tree density %. | Fully automated landmark localization and vascular area density quantification. |
+| **Candidate Lesion Evidence Detection** | IDRiD-trained dual-head U-Net ONNX model (`lesion_unet.onnx`) with morphological top-hat CV fallback. Extracts $96 \times 96$ px visual crops. | Microaneurysm candidates, Hard exudate candidates, Soft exudate candidates, Hemorrhage candidates, and Neovascularization Risk Indicator. |
+| **Multi-Class DR Severity Grading** | 5-class International Clinical Diabetic Retinopathy (ICDR) grading (Grades 0 to 4) using locked production model **EXP-001** (`EfficientNet-B0`). | $\text{QWK} = 0.7342$, $\text{Accuracy} = 69.85\%$, $\text{Macro F1} = 0.4981$ across 733 held-out test scans. |
+| **Probability & Margin Transparency** | Full 5-class probability vector, top model probability, runner-up class, decision margin %, and uncalibrated label. | Labeled *"Calibration: not applied (raw model probabilities)"* to prevent over-confidence. |
+| **Real Explainable AI (XAI)** | Real Grad-CAM++ using second- and third-order analytical gradients w.r.t. `features.8.0` (1280 channels) with real Grad-CAM fallback. | **Zero synthetic heatmaps**: Returns explicit `XAI_UNAVAILABLE` on model failure. Dynamic target class selection (Grades 0–4). |
+| **On-Demand Region Sensitivity** | Evaluates model probability response when masking candidate evidence regions without altering base model weights. | Neutral reporting: *"Model sensitivity to region masking"* with probability delta. |
+| **Grounded ExplainAI Engine** | Fully offline, deterministic reasoning engine answering 8 mandatory screening questions strictly using `AnalysisResult` facts. | Zero external LLMs, zero cloud dependencies, mathematically grounded. |
+| **Clinical Decision Support & Triage** | Automated screening triage based on configured prototype rule (Grade $\ge 2$ = Referable DR) with urgency timelines. | $\text{Sensitivity} = 78.86\%$, $\text{Specificity} = 92.64\%$. |
+| **Auditable Clinical Reporting** | Automated, print-ready, self-contained HTML medical screening report generated exclusively from `AnalysisResult`. | 100% parity between UI display, ExplainAI answers, and exported report. |
 
 ---
 
-## 3. Architecture
-
-RetinaGuard employs a 7-stage deterministic screening pipeline:
+## 3. 12-Stage Pipeline Architecture
 
 ```
                   Raw Color Fundus Photograph
                                │
                                ▼
-            ┌──────────────────────────────────────┐
-            │   STAGE 1: Quality Assessment Gate   │
-            │  (Sharpness, Illumination, Contrast) │
-            └──────────────────┬───────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ STAGE 1: Image Quality Assessment Gate                      │
+│ (Laplacian Sharpness, Illumination, Contrast, FOV)          │
+└──────────────┬───────────────────────────────┬──────────────┘
+               │ [Score < 40.0]                │ [Score >= 40.0]
+               ▼                               ▼
+┌───────────────────────────┐    ┌────────────────────────────┐
+│   SAFETY GATE HALT        │    │ STAGE 2: Border Removal    │
+│ Downstream grading halted;│    └─────────────┬──────────────┘
+│ clinical recapture advice │                  ▼
+└──────────────┬────────────┘    ┌────────────────────────────┐
+               │                 │ STAGE 3: Scale Standardize │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 4: Green-Ch. CLAHE   │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 5: Anatomy & Vessels │
+               │                 │ Optic Disc, Fovea, Vessels │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 6: Candidate Lesions │
+               │                 │ U-Net Candidates & Crops   │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 7: EXP-001 ONNX      │
+               │                 │ 5-Class ICDR Softmax       │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 8: Real Grad-CAM++   │
+               │                 │ 2nd/3rd-Order Attribution  │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 9: Region Masking    │
+               │                 │ On-Demand Sensitivity Test │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 10: ExplainAI Engine │
+               │                 │ 8 Grounded Clinical Answers│
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 11: Screening Triage │
+               │                 │ Prototype Rule: Grade >= 2 │
+               │                 └─────────────┬──────────────┘
+               │                               ▼
+               │                 ┌────────────────────────────┐
+               │                 │ STAGE 12: HTML Report Gen  │
+               │                 │ Sourced from Single Truth  │
+               │                 └─────────────┬──────────────┘
+               │                               │
+               └───────────────┬───────────────┘
                                │
-             ┌─────────────────┴─────────────────┐
-             │                                   │
-      [Score < 40]                        [Score ≥ 40]
-             │                                   │
-             ▼                                   ▼
-┌─────────────────────────┐         ┌─────────────────────────┐
-│     SAFETY GATE HALT    │         │  STAGE 2: Enhancement   │
-│ Downstream grading      │         │   Green-channel CLAHE   │
-│ stopped; clinical       │         └────────────┬────────────┘
-│ recapture requested     │                      │
-└─────────────────────────┘                      ▼
-                                    ┌─────────────────────────┐
-                                    │   STAGE 3: Landmarks    │
-                                    │ Optic Disc, Fovea,      │
-                                    │ Vessel Density %        │
-                                    └────────────┬────────────┘
-                                                 │
-                                                 ▼
-                                    ┌─────────────────────────┐
-                                    │    STAGE 4: Lesions     │
-                                    │ Microaneurysms,         │
-                                    │ Disc-Masked Exudates,   │
-                                    │ Hemorrhages, NV Risk    │
-                                    └────────────┬────────────┘
-                                                 │
-                                                 ▼
-                                    ┌─────────────────────────┐
-                                    │ STAGE 5: EXP-001 ONNX   │
-                                    │ 5-Class ICDR Grading    │
-                                    │ Softmax Probabilities   │
-                                    └────────────┬────────────┘
-                                                 │
-                                                 ▼
-                                    ┌─────────────────────────┐
-                                    │  STAGE 6: Real Grad-CAM │
-                                    │ True Saliency Heatmap   │
-                                    │ Visual Explanation      │
-                                    └────────────┬────────────┘
-                                                 │
-                                                 ▼
-                                    ┌─────────────────────────┐
-                                    │ STAGE 7: Decision & PDF │
-                                    │ Triage Recommendation   │
-                                    │ Print-Ready HTML Report │
-                                    └─────────────────────────┘
+                               ▼
+        ┌─────────────────────────────────────────────┐
+        │ UNIFIED CONTRACT: AnalysisResult JSON Schema│
+        └─────────────────────────────────────────────┘
 ```
 
 ---
 
-## 4. Features
+## 4. Key Technical Capabilities
 
-- **Double-Workstation Architecture**: Choose between the zero-install web browser interface or the native MATLAB desktop app.
-- **True Grad-CAM Explainability**: Highlights the spatial regions driving the model's prediction without using surrogate or fake heatmaps.
-- **Strict Patient Safety Gate**: Immediately aborts classification on severely blurred, underexposed, or corrupted images to eliminate false reassurances.
-- **Multi-Layer Interactive Viewport**: Instantly toggle between Original, CLAHE Enhanced, Vessel Map, Lesion Candidates, and Grad-CAM Heatmap views.
-- **Integrated Report Generator**: Produces auditable, printable medical screening reports in HTML format.
-- **100% Offline Capable**: Requires no internet access or external cloud services; ideal for isolated rural clinics.
+- **Unified Single Source of Truth**: Sourced exclusively from `python/contracts/analysis_contract.py` guaranteeing zero divergence between UI, ExplainAI, and printed reports.
+- **Patient Safety Gate**: Automatically stops downstream processing on ungradable images (blur, pupil vignetting, extreme exposure) to eliminate false reassurances.
+- **Candidate Evidence Framing**: Presents findings as candidate evidence with bounding boxes and localized $96 \times 96$ crops for screener inspection.
+- **Real Grad-CAM++ Attribution**: Uses analytical higher-order gradients to localize multiple scattered microvascular abnormalities without synthetic artifacts.
+- **Dynamic Target Class Selection**: Screeners can evaluate model attribution for any class (Grades 0 to 4) to investigate differential evidence.
+- **On-Demand Region Sensitivity**: Measures class probability deltas when obscuring candidate lesion areas using exact neutral phrasing (*"Model sensitivity to region masking"*).
+- **Offline Grounded ExplainAI**: Answers 8 mandatory screening questions deterministically without cloud dependencies or hallucination risks.
+- **100% Offline Edge Runtime**: Sub-400ms end-to-end latency on quad-core CPU hardware; runs anywhere without internet.
 
 ---
 
-## 5. Requirements
+## 5. System Requirements
 
 ### Hardware Requirements
-- **Processor**: Dual-Core CPU (Intel Core i3 / AMD Ryzen 3 or higher)
+- **Processor**: Intel Core i3 / AMD Ryzen 3 (Quad-Core, 2.0 GHz+) or higher
 - **RAM**: Minimum 4 GB RAM (8 GB recommended)
-- **Disk Space**: ~2 GB free disk space for models, dependencies, and sample images
+- **Disk Space**: ~2 GB free disk space for model weights, dependencies, and reference cases
+- **GPU**: Optional (CPU execution is fully optimized via ONNX Runtime)
 
 ### Software Requirements
 - **Operating System**: Windows 10/11, macOS, or Linux (Ubuntu 20.04+)
-- **Python**: Python 3.9, 3.10, or 3.11
-- **MATLAB (Optional)**: MATLAB R2021b or newer with Deep Learning Toolbox and Image Processing Toolbox (only required for running the MATLAB app).
+- **Python**: Python 3.10 or 3.11 (Python 3.11 recommended)
+- **MATLAB (Optional)**: MATLAB R2021b or newer (only required for running the MATLAB app)
 
 ---
 
-## 6. Installation
+## 6. Installation & Quick Start
 
-Clone the repository to your local machine:
-
+### 6.1 Clone the Repository
 ```bash
 git clone https://github.com/sailohith95/RetinaGuard.git
 cd RetinaGuard
 ```
 
-### Python Environment Setup
-
-Create and activate a virtual environment:
-
+### 6.2 Python Virtual Environment Setup
 ```bash
 # Windows
-python -m venv venv
+py -3.11 -m venv venv
 venv\Scripts\activate
 
 # macOS / Linux
-python3 -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate
 ```
 
-Install the production dependencies:
-
+### 6.3 Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## 7. Local Startup
+## 7. Launching RetinaGuard 2.0
 
-### Running the Web Application (Recommended)
-
-From the project root directory, run:
-
+### Web Workstation (Recommended)
+From the repository root:
 ```bash
 python webapp/run.py
 ```
+- Automatically starts FastAPI server on `http://127.0.0.1:8000`.
+- Opens your default web browser to the clinical screening workstation.
+- Accessible across local network via `http://<your-ip>:8000`.
 
-- The launcher will automatically bind to `http://127.0.0.1:8000` (or the next available port).
-- Your default web browser will open to the clinical workstation interface automatically.
-- To access from other devices on your local Wi-Fi, navigate to `http://<your-computer-ip>:8000`.
-
-### Running the MATLAB Application
-
-Open MATLAB and navigate to the `RetinaGuard` directory, then run:
-
+### MATLAB Desktop Application
+Open MATLAB, navigate to `RetinaGuard`, and execute:
 ```matlab
 launch
 ```
-
-This will initialize the project paths, verify model weights, and launch the MATLAB App Designer workstation.
-
----
-
-## 8. Demo Instructions
-
-The workstation includes **6 curated authentic reference cases** covering the entire clinical spectrum:
-
-| Case ID | Scenario | True ICDR Grade | Expected Behavior |
-| :--- | :--- | :---: | :--- |
-| **Case 1** | Normal Healthy Retina | Grade 0 (No DR) | Passes quality gate; predicts Grade 0; Non-Referable; routine 12-month follow-up. |
-| **Case 2** | Mild NPDR Reference | Grade 1 (Mild NPDR) | Detects early microaneurysms; non-referable triage. |
-| **Case 3** | Moderate NPDR Reference | Grade 2 (Moderate NPDR) | Detects hard exudates & microaneurysms; triggers Referable DR badge (3–6 month referral). |
-| **Case 4** | Severe NPDR Reference | Grade 3 (Severe NPDR) | Multiple intra-retinal hemorrhages; triggers Urgent Referable DR (1 month). |
-| **Case 5** | Proliferative DR Reference | Grade 4 (PDR) | High lesion density and neovascularization risk; triggers immediate specialist referral. |
-| **Case 6** | Poor Quality / Motion Blur | Ungradable (-1) | **Safety Gate triggers**: Downstream grading halted, recapture guidance displayed. |
-
-### How to Run a Demo
-1. In the web workstation, locate the **Curated Reference Scenarios** dropdown.
-2. Select any case (e.g., *Case 3 — Moderate NPDR Reference*).
-3. Click **Load Case** to display the retinal photograph.
-4. Click **Analyze Image ▶**. The full multi-stage pipeline executes in under 1 second.
-5. Use the layer toggle buttons (**Original**, **Enhanced**, **Vessels**, **Lesions**, **Heatmap**) to explore the findings.
-6. Click **Download PDF / Clinical Report** to export the printable documentation.
+This initializes paths, checks model weights, and opens the standalone App Designer interface.
 
 ---
 
-## 9. Model Information
+## 8. Curated Authentic Demo Cases
 
-The primary screening model is locked to **EXP-001**:
+The system bundles **6 authentic clinical reference cases** for immediate demonstration:
 
-- **Architecture**: `EfficientNet-B0` (Pre-trained on ImageNet, fine-tuned on fundus photography)
-- **Loss Function**: Focal Loss ($\gamma = 2.0$) with inverse class-frequency weighting to address medical class imbalance
-- **Input Resolution**: $224 \times 224$ pixels, standardized with retinal circle cropping and CLAHE
-- **Inference Format**: Dual deployment:
-  - **ONNX Runtime** (`models/aptos_efficientnet/best_model.onnx`): High-speed, low-memory CPU forward pass (< 0.15s)
-  - **PyTorch** (`models/aptos_efficientnet/best_model.pt`): Full autograd engine for true Grad-CAM computation
-
-### Verified Production Metrics
-
-Validated on the held-out stratified APTOS validation set ($N = 733$ images):
-
-| Metric | Validated Score |
-| :--- | :--- |
-| **Quadratic Weighted Kappa (QWK)** | **0.7342** |
-| **Overall Accuracy** | **69.85%** |
-| **Macro F1-Score** | **0.4981** |
-| **Referable DR Sensitivity (Grade ≥ 2)** | **78.86%** |
-| **Referable DR Specificity (Grade < 2)** | **92.64%** |
-| **ONNX vs PyTorch Numerical Parity** | **Max absolute error < 4.05 × 10⁻⁶** |
+| Case ID | Reference Condition | Reference Grade | Expected Workstation Behavior |
+| :---: | :--- | :---: | :--- |
+| **Case 1** | Normal Healthy Retina | Grade 0 | Score 76.3 (GOOD), Grade 0 (90.0% prob), Non-referable, 12-month follow-up. |
+| **Case 2** | Mild NPDR | Grade 1 | Isolated microaneurysm candidates, non-referable triage (6–12 month follow-up). |
+| **Case 3** | Moderate NPDR | Grade 2 | Hard exudate & hemorrhage candidates, triggers Referable DR badge (3–6 month referral). |
+| **Case 4** | Severe NPDR | Grade 3 | Multiple candidate hemorrhages, urgent specialist referral recommended (1 month). |
+| **Case 5** | Proliferative DR | Grade 4 | Extensive pathology, high neovascularization risk indicator, urgent referral required. |
+| **Case 6** | Poor Optical Quality | **Ungradable (-1)** | **Safety Gate Halts Grading**: Score 14.1, Laplacian var 1.2, actionable recapture guidance. |
 
 ---
 
-## 10. Dataset Information
+## 9. Verification & Automated Test Suites
 
-RetinaGuard was trained and evaluated on the **APTOS 2019 Blindness Detection** benchmark dataset:
-
-- **Total Images**: 3,662 high-resolution color fundus photographs acquired across rural clinics in India.
-- **Split Strategy**: 80% Stratified Training ($N = 2,929$), 20% Held-out Stratified Validation ($N = 733$).
-- **Class Distribution**:
-  - Grade 0 (No DR): 1,805 images (49.3%)
-  - Grade 1 (Mild NPDR): 370 images (10.1%)
-  - Grade 2 (Moderate NPDR): 999 images (27.3%)
-  - Grade 3 (Severe NPDR): 193 images (5.3%)
-  - Grade 4 (Proliferative DR): 295 images (8.0%)
-- **Data Privacy Note**: Raw dataset images and competition archives are excluded from the repository via `.gitignore`. The repository includes 6 anonymized demo images strictly for validation and testing.
-
----
-
-## 11. MATLAB Setup
-
-If you wish to use the native MATLAB interface:
-
-1. Open MATLAB (R2021b or later recommended).
-2. Set your current folder to the cloned `RetinaGuard` directory.
-3. Run the automated test suite:
-   ```matlab
-   runAllTests
-   ```
-4. Launch the desktop application:
-   ```matlab
-   launch
-   ```
-
-*Required MATLAB Toolboxes: Deep Learning Toolbox, Image Processing Toolbox, Computer Vision Toolbox.*
-
----
-
-## 12. Python Setup
-
-Verify your Python environment by running the environment audit:
+RetinaGuard 2.0 includes comprehensive automated test coverage:
 
 ```bash
-python python/audit_pipeline.py
-```
+# 1. Run RetinaGuard 2.0 Core Verification Suite (11 tests)
+py -3.11 -m unittest webapp/test_retinaguard_2.py
 
-This verifies that:
-- Python version is 3.9–3.11
-- PyTorch and Torchvision can instantiate `EfficientNet-B0`
-- ONNX Runtime loads `models/aptos_efficientnet/best_model.onnx`
-- OpenCV is functioning in headless mode
-- All demo sample images are present in `demo/sample_images/`
+# 2. Run Webapp Integration Suite (16 tests)
+py -3.11 -m unittest webapp/test_webapp.py
 
----
+# 3. Run Lesion U-Net Segmentation Suite (9 tests)
+py -3.11 -m unittest tests/test_lesion_segmentation.py
 
-## 13. Testing
+# 4. Run SIH End-to-End Test Suite (18 tests)
+py -3.11 -m unittest python/test_end_to_end_sih.py
 
-RetinaGuard includes comprehensive automated test suites covering all components:
+# 5. Run Python Pipeline Verification
+py -3.11 python/verify_pipeline.py
 
-### 1. Web Application Test Suite (15 Tests)
-Validates web endpoints, quality scoring, safety gate, EXP-001 inference, Grad-CAM, and reporting:
-```bash
-python webapp/test_webapp.py
-```
-
-### 2. Live Server Integration Test
-Validates live HTTP request/response flows against a running server:
-```bash
-# In terminal 1: start server
-python webapp/run.py
-
-# In terminal 2: run test
-python webapp/test_live_server.py
-```
-
-### 3. Core SIH End-to-End Suite (18 Tests)
-Validates image enhancement, anatomical landmarks, lesion detectors, PyTorch/ONNX parity, and latency benchmarks:
-```bash
-python python/test_end_to_end_sih.py
-```
-
-### 4. MATLAB Test Suite (15 Tests)
-In MATLAB:
-```matlab
-runAllTests
+# 6. Run Empirical Walkthrough Evaluation across all 6 cases
+py -3.11 python/verify_walkthrough_cases.py
 ```
 
 ---
 
-## 14. Limitations
+## 10. Documentation Index
 
-1. **Candidate Lesion Heuristics**: Microaneurysms, exudates, and hemorrhages are identified using mathematical morphology and edge filters. They serve as *candidate visual aids* for clinicians, not certified manual segmentations.
-2. **Camera Calibration**: Calibrated primarily for standard 45° to 50° macula-centered fundus photographs. Performance on ultra-widefield (UWF) scanning laser systems has not been calibrated.
-3. **Severe Pathology Rarity**: Due to the natural epidemiological distribution of diabetic retinopathy, Grades 3 and 4 represent smaller proportions of public datasets. Clinicians should exercise particular care with suspected advanced pathology.
+Detailed engineering, clinical, and regulatory specifications are available in `documentation/`:
+- [`RETINAGUARD_2_ARCHITECTURE.md`](file:///d:/RetinaGuard-main/RetinaGuard-main/documentation/RETINAGUARD_2_ARCHITECTURE.md): Multi-stage pipeline architecture & `AnalysisResult` contract schema.
+- [`RETINAGUARD_2_XAI.md`](file:///d:/RetinaGuard-main/RetinaGuard-main/documentation/RETINAGUARD_2_XAI.md): Grad-CAM++ formulation, higher-order gradients, and region sensitivity.
+- [`RETINAGUARD_2_MODEL_CARD.md`](file:///d:/RetinaGuard-main/RetinaGuard-main/documentation/RETINAGUARD_2_MODEL_CARD.md): EXP-001 empirical validation (QWK 0.7342, accuracy 69.85%), training loss, and calibration.
+- [`RETINAGUARD_2_LIMITATIONS.md`](file:///d:/RetinaGuard-main/RetinaGuard-main/documentation/RETINAGUARD_2_LIMITATIONS.md): Clinical boundaries, prohibited terms, and regulatory disclaimers.
+- [`RETINAGUARD_2_DEMO_SCRIPT.md`](file:///d:/RetinaGuard-main/RetinaGuard-main/documentation/RETINAGUARD_2_DEMO_SCRIPT.md): Step-by-step hackathon jury presentation script.
 
 ---
 
-## 15. AI-Assisted Screening Disclaimer
+## 11. Clinical Disclaimer
 
-> **IMPORTANT CLINICAL & LEGAL NOTICE**  
-> **RetinaGuard is an artificial intelligence research and decision-support prototype.**  
-> It is designed to assist qualified healthcare professionals by triaging fundus images and highlighting suspicious visual findings. **It does NOT constitute an autonomous medical device, does not provide a definitive diagnosis, and has not been certified by the US FDA, European CE, or Indian CDSCO.**  
-> All automated classifications, quality evaluations, and triage recommendations must be independently verified by a licensed ophthalmologist, optometrist, or trained medical practitioner before initiating or altering any patient clinical management plan.
+```
+IMPORTANT CLINICAL DISCLAIMER:
+RetinaGuard 2.0 is an AI-assisted diabetic retinopathy screening decision-support 
+research prototype developed for SIH 2026 (PS: SIH26038, Team VyuhaX). 
+It does NOT provide an autonomous medical diagnosis. All findings, candidate lesion counts, 
+and recommendations must be confirmed by a licensed ophthalmologist or retina specialist 
+before clinical management or treatment decisions are undertaken.
+```

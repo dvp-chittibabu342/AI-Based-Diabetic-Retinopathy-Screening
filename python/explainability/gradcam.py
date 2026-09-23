@@ -35,16 +35,25 @@ class GradCAM:
     to capture feature maps and gradients without modifying the model.
     """
 
-    def __init__(self, model: nn.Module, target_layer: Optional[nn.Module] = None):
+    def __init__(self, model: Optional[nn.Module], target_layer: Optional[nn.Module] = None):
         self.model = model
+        self._activations = None
+        self._gradients = None
+        self._fwd_hook = None
+        self._bwd_hook = None
+
+        if model is None:
+            self.device = torch.device("cpu")
+            self.target_layer = None
+            return
+
         self.device = next(model.parameters()).device
 
         # Auto-detect the last conv layer for EfficientNet-B0
         if target_layer is None:
             target_layer = self._find_last_conv(model)
 
-        self._activations = None
-        self._gradients = None
+        self.target_layer = target_layer
 
         # Register hooks
         self._fwd_hook = target_layer.register_forward_hook(self._save_activation)
@@ -66,6 +75,9 @@ class GradCAM:
             heatmap_np    : (H, W) float32 heatmap in [0, 1]
             overlay_pil   : PIL image of heatmap blended over original
         """
+        if self.model is None or self.target_layer is None:
+            return np.zeros((input_tensor.shape[2], input_tensor.shape[3]), dtype=np.float32), None
+
         self.model.eval()
         input_tensor = input_tensor.to(self.device)
         input_tensor.requires_grad_()
@@ -194,58 +206,40 @@ class GradCAMGenerator:
         self,
         image_tensor: torch.Tensor,
         original_pil: Image.Image,
-        predicted_grade: int,
+        predicted_grade: Optional[int] = None,
+        target_class: Optional[int] = None,
     ) -> Tuple[Optional[Image.Image], bool]:
         """
-        Generate heatmap overlay.
+        Generate real Grad-CAM heatmap overlay.
+        NEVER generates synthetic or fake heatmaps.
 
         Returns:
             (overlay_image, is_real_gradcam)
-            is_real_gradcam = False if this is a placeholder
+            (None, False) if model is unavailable or Grad-CAM generation fails.
         """
         if not self.available or self.model is None:
-            return self._placeholder_heatmap(original_pil, predicted_grade), False
+            logger.warning("Grad-CAM requested but model is unavailable. No attribution generated.")
+            return None, False
+
+        class_to_target = target_class if target_class is not None else predicted_grade
 
         try:
             if self._gcam is None:
                 self._gcam = GradCAM(self.model)
 
-            heatmap_np, _ = self._gcam.generate(image_tensor, target_class=predicted_grade)
+            heatmap_np, _ = self._gcam.generate(image_tensor, target_class=class_to_target)
+            if heatmap_np is None or np.isnan(heatmap_np).any() or heatmap_np.size == 0:
+                logger.warning("Grad-CAM output invalid or NaN. Marking XAI unavailable.")
+                return None, False
+
             overlay = self._gcam.overlay_on_image(original_pil, heatmap_np, alpha=0.45)
             return overlay, True
 
         except Exception as e:
-            logger.warning("Grad-CAM failed (%s); returning placeholder.", e)
-            return self._placeholder_heatmap(original_pil, predicted_grade), False
+            logger.warning("Grad-CAM generation failed (%s); XAI unavailable.", e)
+            return None, False
 
     def cleanup(self):
         if self._gcam is not None:
             self._gcam.remove_hooks()
             self._gcam = None
-
-    @staticmethod
-    def _placeholder_heatmap(original_pil: Image.Image, grade: int) -> Image.Image:
-        """
-        DEMO VISUALIZATION — Gaussian blob placeholder.
-        Clearly NOT a real Grad-CAM. Shown only when model is unavailable.
-        """
-        import matplotlib.cm as cm
-        from PIL import Image as PILImage
-
-        w, h = original_pil.size
-        Y, X = np.mgrid[0:h, 0:w]
-        # Grade-dependent position heuristic (purely illustrative)
-        cx = w * (0.35 + 0.05 * grade)
-        cy = h * (0.45 + 0.05 * grade)
-        sigma = min(w, h) * 0.28
-        gaussian = np.exp(-((X - cx)**2 + (Y - cy)**2) / (2 * sigma**2))
-        gaussian = gaussian / gaussian.max()
-
-        cmap = cm.get_cmap("jet")
-        heat_rgb = np.uint8(cmap(gaussian)[:, :, :3] * 255)
-        orig_arr = np.array(original_pil.convert("RGB")).astype(float)
-        blended = 0.55 * orig_arr + 0.45 * heat_rgb.astype(float)
-        blended = np.clip(blended, 0, 255).astype(np.uint8)
-
-        result = PILImage.fromarray(blended)
-        return result
